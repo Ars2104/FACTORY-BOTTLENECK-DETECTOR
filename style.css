@@ -113,3 +113,11 @@ color: white;
 border-radius: 12px;
 font-size: 16px;
 }
+.kpi-label {
+    font-size: 14px;
+    color: #1f2937;
+    font-family: var(--sans);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-weight: 700;
+}
