@@ -52,10 +52,11 @@ transform: translateY(-5px);
 
 .card h3
 {
-color: #374151;
+color: #111827;
+font-size: 22px;
+font-weight: 600;
 margin-bottom: 10px;
 }
-
 .card p
 {
 font-size: 18px;
