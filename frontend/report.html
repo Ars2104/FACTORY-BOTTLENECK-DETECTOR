@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Factory Bottleneck Detector Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f0f4f8;
+    --surface: #ffffff;
+    --surface2: #f7f9fc;
+    --border: rgba(0,0,0,0.07);
+    --border2: rgba(0,0,0,0.14);
+    --text: #0f172a;
+    --text2: #334155;
+    --muted: #64748b;
+    --blue: #2563eb;
+    --blue-light: #eff6ff;
+    --blue-mid: #bfdbfe;
+    --green: #059669;
+    --green-light: #ecfdf5;
+    --green-mid: #a7f3d0;
+    --yellow: #d97706;
+    --yellow-light: #fffbeb;
+    --yellow-mid: #fde68a;
+    --red: #dc2626;
+    --red-light: #fef2f2;
+    --red-mid: #fecaca;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Plus Jakarta Sans', sans-serif;
+    --display: 'Syne', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    background: var(--text);
+    padding: 0 2.5rem;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+  .topbar-brand .dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: #34d399;
+    box-shadow: 0 0 8px #34d399;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+  .topbar-right {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: .04em;
+  }
+
+  /* LAYOUT */
+  .page { max-width: 1140px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+
+  /* HERO */
+  .hero {
+    margin-bottom: 2.5rem;
+    padding: 2rem 2.25rem;
+    background: var(--text);
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 260px; height: 260px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(37,99,235,0.35) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: 30%;
+    width: 320px; height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(5,150,105,0.2) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #60a5fa;
+    margin-bottom: .6rem;
+  }
+  .hero h1 {
+    font-family: var(--display);
+    font-size: 32px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: .75rem;
+    letter-spacing: -.01em;
+    position: relative;
+    z-index: 1;
+  }
+  .hero p {
+    color: rgba(255,255,255,0.55);
+    max-width: 620px;
+    font-size: 13.5px;
+    line-height: 1.75;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* SECTION LABEL */
+  .sec-label {
+    font-family: var(--display);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+  }
+  .sec-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border2);
+  }
+
+  /* KPI GRID */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 14px;
+    margin-bottom: 2.5rem;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    transition: border-color .2s, transform .2s, box-shadow .2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .kpi:hover { border-color: var(--blue-mid); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37,99,235,0.08); }
+  .kpi-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .9rem;
+  }
+  .kpi-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    font-weight: 500;
+  }
+  .kpi-icon { font-size: 18px; opacity: .3; }
+  .kpi-val {
+    font-family: var(--display);
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: .9rem;
+    letter-spacing: -.02em;
+  }
+  .progress-track {
+    height: 6px;
+    background: var(--bg);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1.1s cubic-bezier(.4,0,.2,1);
+    width: 0%;
+  }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  /* BADGES */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-family: var(--mono);
+    font-weight: 500;
+    letter-spacing: .02em;
+  }
+  .badge-green { background: var(--green-light); color: var(--green); border: 1px solid var(--green-mid); }
+  .badge-yellow { background: var(--yellow-light); color: var(--yellow); border: 1px solid var(--yellow-mid); }
+  .badge-red { background: var(--red-light); color: var(--red); border: 1px solid var(--red-mid); }
+  .badge-blue { background: var(--blue-light); color: var(--blue); border: 1px solid var(--blue-mid); }
+
+  /* INFO ROW */
+  .info-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 14px;
+    margin-bottom: 2.5rem;
+  }
+  .info-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    transition: border-color .2s, transform .2s, box-shadow .2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .info-card:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.07); }
+  .info-card .ic-label {
+    font-size: 10px;
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    color: var(--muted);
+    margin-bottom: .5rem;
+    font-weight: 500;
+  }
+  .info-card .ic-val {
+    font-family: var(--display);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -.01em;
+  }
+  .info-card .ic-sub {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* TABLE */
+  .table-wrap {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: var(--surface2); }
+  th {
+    padding: 12px 18px;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    color: var(--muted);
+    font-weight: 500;
+    border-bottom: 1.5px solid var(--border);
+  }
+  td {
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13.5px;
+    color: var(--text2);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr.rank-1 td { background: var(--blue-light); color: var(--text); }
+  tr:not(.rank-1):hover td { background: var(--surface2); }
+
+  .rank-num {
+    display: inline-flex;
+    width: 26px; height: 26px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    background: var(--bg);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .rank-num.top { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+  .score-cell { display: flex; align-items: center; gap: 10px; }
+  .score-bar-bg {
+    flex: 1;
+    height: 5px;
+    background: var(--bg);
+    border-radius: 3px;
+    overflow: hidden;
+    max-width: 140px;
+  }
+  .score-bar-fill { height: 100%; border-radius: 3px; }
+  .score-num { font-family: var(--mono); font-size: 12px; min-width: 36px; color: var(--text); font-weight: 500; }
+
+  /* ANALYSIS */
+  .analysis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 14px;
+    margin-bottom: 2.5rem;
+  }
+  .analysis-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    transition: border-color .2s, transform .2s, box-shadow .2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .analysis-card:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.07); }
+  .ac-label {
+    font-size: 10.5px;
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+    margin-bottom: .6rem;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-weight: 500;
+  }
+  .ac-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .ac-val {
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: .4rem;
+    letter-spacing: -.02em;
+  }
+  .ac-status { font-size: 12px; color: var(--muted); font-weight: 500; }
+
+  /* RECOMMENDATIONS */
+  .rec-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 14px;
+    margin-bottom: 2.5rem;
+  }
+  .rec-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    transition: border-color .2s, transform .2s, box-shadow .2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .rec-card:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.07); }
+  .rec-tag {
+    font-size: 10px;
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    color: var(--muted);
+    margin-bottom: .6rem;
+    font-weight: 500;
+  }
+  .rec-action {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: .4rem;
+    font-family: var(--display);
+  }
+  .rec-detail { font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .rec-highlight {
+    font-family: var(--display);
+    font-size: 26px;
+    font-weight: 800;
+    margin-top: .6rem;
+    letter-spacing: -.02em;
+  }
+
+  /* SUMMARY STATS */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 14px;
+    margin-bottom: 2.5rem;
+  }
+  .sum-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: border-color .2s, transform .2s, box-shadow .2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .sum-card:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.07); }
+  .sum-icon { font-size: 22px; margin-bottom: .6rem; }
+  .sum-val {
+    font-family: var(--display);
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+    letter-spacing: -.02em;
+  }
+  .sum-label { font-size: 11.5px; color: var(--muted); margin-top: 5px; font-weight: 500; }
+
+  footer {
+    border-top: 1.5px solid var(--border);
+    padding-top: 1.5rem;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: .05em;
+  }
+
+  /* ANIMATIONS */
+  .fade-in { animation: fadeIn .45s ease both; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .fade-in:nth-child(1) { animation-delay: .05s }
+  .fade-in:nth-child(2) { animation-delay: .12s }
+  .fade-in:nth-child(3) { animation-delay: .19s }
+  .fade-in:nth-child(4) { animation-delay: .26s }
+
+  @media (max-width: 600px) {
+    .topbar { padding: 0 1.25rem; }
+    .page { padding: 1.5rem 1rem 2.5rem; }
+    .hero { padding: 1.5rem; }
+    .hero h1 { font-size: 24px; }
+    th, td { padding: 10px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <span class="dot"></span>
+    Factory Bottleneck Detector
+  </div>
+  <div class="topbar-right" id="tsLabel">LOADING DATA…</div>
+</div>
+
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-tag">Experiential Learning Project · Industrial Analytics</div>
+    <h1>Bottleneck Detector Dashboard</h1>
+    <p>Real-time analytics for identifying, diagnosing, and resolving production bottlenecks across the factory floor. Monitor machine health, surface critical constraints, and receive data-driven recommendations to optimise throughput and reduce downtime.</p>
+  </div>
+
+  <!-- KPI -->
+  <div class="sec-label">Overview</div>
+  <div class="kpi-grid">
+    <div class="kpi fade-in">
+      <div class="kpi-head">
+        <span class="kpi-label">Factory Health Score</span>
+        <span class="kpi-icon">&#9679;</span>
+      </div>
+      <div class="kpi-val" id="healthScore">—</div>
+      <div class="progress-track"><div class="progress-fill" id="healthBar"></div></div>
+      <div class="progress-meta"><span id="healthBadge"></span><span>/ 100</span></div>
+    </div>
+    <div class="kpi fade-in">
+      <div class="kpi-head">
+        <span class="kpi-label">Total Machines</span>
+        <span class="kpi-icon">⚙</span>
+      </div>
+      <div class="kpi-val" id="totalMachines">—</div>
+      <div class="progress-meta"><span style="color:var(--muted)">Active in dataset</span></div>
+    </div>
+    <div class="kpi fade-in">
+      <div class="kpi-head">
+        <span class="kpi-label">Future Risk Score</span>
+        <span class="kpi-icon">&#9888;</span>
+      </div>
+      <div class="kpi-val" id="riskScore">—</div>
+      <div class="progress-track"><div class="progress-fill" id="riskBar"></div></div>
+      <div class="progress-meta"><span id="riskBadge"></span><span>/ 100</span></div>
+    </div>
+  </div>
+
+  <!-- CRITICAL BOTTLENECK -->
+  <div class="sec-label">Current Critical Bottleneck</div>
+  <div class="info-row">
+    <div class="info-card fade-in">
+      <div class="ic-label">Machine ID</div>
+      <div class="ic-val" id="topMachine">—</div>
+      <div class="ic-sub">Primary constraint</div>
+    </div>
+    <div class="info-card fade-in">
+      <div class="ic-label">Machine Type</div>
+      <div class="ic-val" id="machineType">—</div>
+      <div class="ic-sub">Equipment class</div>
+    </div>
+    <div class="info-card fade-in">
+      <div class="ic-label">Bottleneck Score</div>
+      <div class="ic-val" id="bottleneckScore">—</div>
+      <div class="ic-sub" id="scoreBadgeWrap"></div>
+    </div>
+  </div>
+
+  <!-- TOP 10 TABLE -->
+  <div class="sec-label">Top 10 Bottleneck Machines</div>
+  <div class="table-wrap" style="margin-bottom:2.5rem">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:60px">Rank</th>
+          <th>Machine ID</th>
+          <th>Bottleneck Score</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="top10Table"></tbody>
+    </table>
+  </div>
+
+  <!-- ROOT CAUSE -->
+  <div class="sec-label">Root Cause Analysis</div>
+  <div class="analysis-grid">
+    <div class="analysis-card fade-in">
+      <div class="ac-label"><span class="ac-dot" style="background:var(--red)"></span>High Waiting Time</div>
+      <div class="ac-val" id="waitingTime" style="color:var(--red)">—</div>
+      <div class="ac-status" id="waitStatus"></div>
+    </div>
+    <div class="analysis-card fade-in">
+      <div class="ac-label"><span class="ac-dot" style="background:var(--yellow)"></span>High Downtime</div>
+      <div class="ac-val" id="downtime" style="color:var(--yellow)">—</div>
+      <div class="ac-status" id="downStatus"></div>
+    </div>
+    <div class="analysis-card fade-in">
+      <div class="ac-label"><span class="ac-dot" style="background:var(--blue)"></span>Low Throughput</div>
+      <div class="ac-val" id="throughput" style="color:var(--blue)">—</div>
+      <div class="ac-status" id="thruStatus"></div>
+    </div>
+  </div>
+
+  <!-- RECOMMENDATIONS -->
+  <div class="sec-label">Recommendations</div>
+  <div class="rec-grid">
+    <div class="rec-card fade-in">
+      <div class="rec-tag">&#9654; Reduce Waiting Time</div>
+      <div class="rec-action">Optimise queue scheduling</div>
+      <div class="rec-detail">Target: &le;35 min. Current gap:</div>
+      <div class="rec-highlight" id="recommendWaiting" style="color:var(--red)">—</div>
+    </div>
+    <div class="rec-card fade-in">
+      <div class="rec-tag">&#9654; Reduce Downtime</div>
+      <div class="rec-action">Preventive maintenance plan</div>
+      <div class="rec-detail">Target: &le;30 min. Current gap:</div>
+      <div class="rec-highlight" id="recommendDowntime" style="color:var(--yellow)">—</div>
+    </div>
+    <div class="rec-card fade-in">
+      <div class="rec-tag">&#9654; Increase Throughput</div>
+      <div class="rec-action">Process flow optimisation</div>
+      <div class="rec-detail" id="recommendThroughput" style="color:var(--green)">Increase above 50 Units</div>
+    </div>
+  </div>
+
+  <!-- FACTORY SUMMARY -->
+  <div class="sec-label">Factory Summary</div>
+  <div class="summary-grid">
+    <div class="sum-card fade-in">
+      <div class="sum-icon" style="color:var(--green)">&#10003;</div>
+      <div class="sum-val" id="healthyMachines">—</div>
+      <div class="sum-label">Healthy Machines</div>
+    </div>
+    <div class="sum-card fade-in">
+      <div class="sum-icon" style="color:var(--red)">&#33;</div>
+      <div class="sum-val" id="criticalMachines">—</div>
+      <div class="sum-label">Critical Machines</div>
+    </div>
+    <div class="sum-card fade-in">
+      <div class="sum-icon" style="color:var(--blue)">&#37;</div>
+      <div class="sum-val" id="averageUtilization">—</div>
+      <div class="sum-label">Avg Utilisation</div>
+    </div>
+    <div class="sum-card fade-in">
+      <div class="sum-icon" style="color:var(--yellow)">&#8593;</div>
+      <div class="sum-val" id="averageThroughput">—</div>
+      <div class="sum-label">Avg Throughput</div>
+    </div>
+  </div>
+
+  <footer>
+    Factory Bottleneck Detector &nbsp;·&nbsp; Experiential Learning Project
+  </footer>
+
+</div><!-- /page -->
+
+<script>
+function riskLevel(score, invert) {
+  const s = parseFloat(score);
+  if (isNaN(s)) return { cls: 'badge-green', label: 'Low' };
+  const hi = invert ? s < 40 : s >= 70;
+  const mid = invert ? (s >= 40 && s < 70) : (s >= 40 && s < 70);
+  if (hi) return { cls: 'badge-red', label: 'High Risk' };
+  if (mid) return { cls: 'badge-yellow', label: 'Moderate' };
+  return { cls: 'badge-green', label: invert ? 'Strong' : 'Low Risk' };
+}
+
+function progressColor(score, invert) {
+  const s = parseFloat(score);
+  if (isNaN(s)) return 'var(--green)';
+  const bad = invert ? s < 40 : s >= 70;
+  const med = invert ? (s >= 40 && s < 70) : (s >= 40 && s < 70);
+  if (bad) return 'var(--red)';
+  if (med) return 'var(--yellow)';
+  return 'var(--green)';
+}
+
+function barColor(sc) {
+  if (sc >= 75) return 'var(--red)';
+  if (sc >= 50) return 'var(--yellow)';
+  return 'var(--green)';
+}
+
+function badge(cls, label) {
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function populate(r) {
+  const set = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+
+  const health = parseFloat(r.HealthScore) || 0;
+  const risk = parseFloat(r.RiskScore) || 0;
+  const waiting = parseFloat(r.WaitingTime) || 0;
+  const downtime = parseFloat(r.Downtime) || 0;
+  const throughput = parseFloat(r.Throughput) || 0;
+
+  set('healthScore', r.HealthScore || '—');
+  set('totalMachines', r.TotalMachines || '—');
+  set('riskScore', r.RiskScore || '—');
+
+  const hl = riskLevel(health, true);
+  const rl = riskLevel(risk, false);
+  set('healthBadge', badge(hl.cls, hl.label));
+  set('riskBadge', badge(rl.cls, rl.label));
+
+  setTimeout(() => {
+    const hb = document.getElementById('healthBar');
+    if (hb) { hb.style.width = Math.min(health,100)+'%'; hb.style.background = progressColor(health,true); }
+    const rb = document.getElementById('riskBar');
+    if (rb) { rb.style.width = Math.min(risk,100)+'%'; rb.style.background = progressColor(risk,false); }
+  }, 80);
+
+  set('topMachine', r.TopMachine || '—');
+  set('machineType', r.MachineType || '—');
+  set('bottleneckScore', r.BottleneckScore || '—');
+  set('scoreBadgeWrap', badge('badge-red', 'Critical'));
+
+  set('waitingTime', (r.WaitingTime || '—') + ' min');
+  set('waitStatus', waiting > 35 ? `Above 35 min threshold (+${(waiting-35).toFixed(1)} min)` : 'Within target');
+  set('downtime', (r.Downtime || '—') + ' min');
+  set('downStatus', downtime > 30 ? `Above 30 min threshold (+${(downtime-30).toFixed(1)} min)` : 'Within target');
+  set('throughput', (r.Throughput || '—') + ' units');
+  set('thruStatus', throughput < 50 ? `Below 50 unit target (−${(50-throughput).toFixed(1)} units)` : 'Above target');
+
+  set('recommendWaiting', waiting > 35 ? `−${(waiting-35).toFixed(2)} min` : 'On target');
+  set('recommendDowntime', downtime > 30 ? `−${(downtime-30).toFixed(2)} min` : 'On target');
+
+  set('healthyMachines', r.HealthyMachines || '—');
+  set('criticalMachines', r.CriticalMachines || '—');
+  set('averageUtilization', (r.AverageUtilization || '—') + '%');
+  set('averageThroughput', r.AverageThroughput || '—');
+
+  // Table
+  const items = [];
+  let maxSc = 0;
+  for (let i = 1; i <= 10; i++) {
+    const v = r['Top' + i];
+    if (v) {
+      const p = v.split(',');
+      const sc = parseFloat(p[1]) || 0;
+      if (sc > maxSc) maxSc = sc;
+      items.push({ rank: i, id: p[0], score: p[1], sc });
+    }
+  }
+  let rows = '';
+  items.forEach(item => {
+    const pct = maxSc > 0 ? ((item.sc / maxSc) * 100).toFixed(0) : 0;
+    const isTop = item.rank === 1;
+    const statusBadge = isTop ? badge('badge-red', 'Critical') :
+      item.sc >= 75 ? badge('badge-red', 'High') :
+      item.sc >= 50 ? badge('badge-yellow', 'Moderate') :
+      badge('badge-green', 'Low');
+    rows += `<tr class="${isTop ? 'rank-1' : ''}">
+      <td><span class="rank-num ${isTop ? 'top' : ''}">${item.rank}</span></td>
+      <td style="font-family:var(--mono);font-size:13px;font-weight:500">${item.id}</td>
+      <td>
+        <div class="score-cell">
+          <span class="score-num">${item.score}</span>
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:${pct}%;background:${barColor(item.sc)}"></div></div>
+        </div>
+      </td>
+      <td>${statusBadge}</td>
+    </tr>`;
+  });
+  set('top10Table', rows);
+
+  document.getElementById('tsLabel').textContent =
+    'LAST UPDATED: ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+fetch('results.txt')
+  .then(r => r.text())
+  .then(data => {
+    const r = {};
+    data.split('\n').forEach(line => {
+      const parts = line.split('=');
+      if (parts.length === 2) r[parts[0].trim()] = parts[1].trim();
+    });
+    populate(r);
+  })
+  .catch(() => {
+    // Demo fallback
+    populate({
+      HealthScore: '74', RiskScore: '58', TotalMachines: '42',
+      TopMachine: 'MCH-07', MachineType: 'CNC Lathe', BottleneckScore: '92.4',
+      WaitingTime: '51.3', Downtime: '43.7', Throughput: '31',
+      HealthyMachines: '29', CriticalMachines: '6',
+      AverageUtilization: '67', AverageThroughput: '44.2',
+      Top1: 'MCH-07,92.4', Top2: 'MCH-13,87.1', Top3: 'MCH-22,81.5',
+      Top4: 'MCH-04,76.3', Top5: 'MCH-18,71.9', Top6: 'MCH-31,65.4',
+      Top7: 'MCH-09,59.8', Top8: 'MCH-27,53.2', Top9: 'MCH-41,47.6',
+      Top10: 'MCH-15,41.0'
+    });
+  });
+</script>
+</body>
+</html>
